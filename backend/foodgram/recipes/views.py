@@ -18,6 +18,8 @@ import io
 from django.http import FileResponse
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
@@ -134,7 +136,9 @@ class ShoppindCartPDFView(APIView):
 
     def get(self, request):
         buffer = io.BytesIO()
+        pdfmetrics.registerFont(TTFont('TenorSans', './fonts/TenorSans.ttf'))
         p = canvas.Canvas(buffer, pagesize=A4)
+        p.setFont('TenorSans', 16)
         current_user = request.user
         shopping_list = current_user.shopping_cart.all()
         shopping_list_dict = dict()
