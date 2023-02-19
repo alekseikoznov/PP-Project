@@ -1,8 +1,8 @@
-from rest_framework import routers
 from django.urls import include, path
-from recipes.views import (TagViewSet, IngredientViewSet, RecipeViewSet,
-                           ShoppingCartViewSet, FavoriteViewSet,
-                           ShoppindCartPDFView)
+from rest_framework import routers
+
+from .views import (FavoriteViewSet, IngredientViewSet, RecipeViewSet,
+                    ShoppindCartPDFView, ShoppingCartViewSet, TagViewSet)
 
 router = routers.DefaultRouter()
 router.register(r'recipes/(?P<recipe_id>\d+)/shopping_cart',

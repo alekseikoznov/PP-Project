@@ -1,12 +1,14 @@
-from rest_framework import status
-from rest_framework.response import Response
-from .models import CustomUser
-from .serializers import SubscriptionsSerializer
 from django.forms.models import model_to_dict
 from django.shortcuts import get_object_or_404
-from recipes.pagination import CustomPagination
+from djoser.views import UserViewSet
 from recipes.mixins import CreteDestroyModelViewSet, ListModelViewSet
+from recipes.pagination import CustomPagination
+from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
+from .models import CustomUser
+from .serializers import CustomUserSerializer, SubscriptionsSerializer
 
 
 class CreateDeleteSubViewSet(CreteDestroyModelViewSet):
@@ -17,24 +19,11 @@ class CreateDeleteSubViewSet(CreteDestroyModelViewSet):
     def create(self, request, *args, **kwargs):
         author_id = self.kwargs['user_id']
         author_to_subscribe = get_object_or_404(CustomUser, id=author_id)
-        current_user = self.request.user
-        if current_user == author_to_subscribe:
-            data = {
-                    "errors": "Нельзя подписаться на себя"
-                    }
-            return Response(status=status.HTTP_400_BAD_REQUEST,
-                            data=data)
-        if current_user.subscriptions.filter(id=author_id):
-            data = {
-                    "errors": "Вы уже подписаны"
-                    }
-            return Response(status=status.HTTP_400_BAD_REQUEST,
-                            data=data)
-        current_user.subscriptions.add(author_to_subscribe)
         dict_obj = model_to_dict(author_to_subscribe)
-        serializer = SubscriptionsSerializer(author_to_subscribe,
-                                             data=dict_obj,
-                                             context={"request": self.request})
+        serializer = SubscriptionsSerializer(
+            author_to_subscribe,
+            data=dict_obj,
+            context={"request": self.request, 'author': author_to_subscribe})
         serializer.is_valid(raise_exception=True)
         serializer.save()
         headers = self.get_success_headers(serializer.data)
@@ -65,3 +54,8 @@ class SubscriptionsViewSet(ListModelViewSet):
 
     def get_queryset(self):
         return self.request.user.subscriptions.all()
+
+
+class CustomUserViewSet(UserViewSet):
+    serializer_class = CustomUserSerializer
+    pagination_class = CustomPagination

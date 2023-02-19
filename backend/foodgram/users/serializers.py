@@ -1,7 +1,8 @@
-from djoser.serializers import UserSerializer,  UserCreateSerializer
-from .models import CustomUser
+import recipes.serializers as rcp
+from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework import serializers
-import importlib
+
+from .models import CustomUser
 
 
 class CustomUserSerializer(UserSerializer):
@@ -35,15 +36,26 @@ class SubscriptionsSerializer(CustomUserSerializer):
         fields = ('email', 'id', 'username', 'first_name', 'last_name',
                   'is_subscribed', 'recipes_count', 'recipes')
 
+    def validate(self, data):
+        current_user = self.context.get('request').user
+        author = self.context.get('author')
+        if current_user == author:
+            raise serializers.ValidationError({
+                "errors": "Нельзя подписаться на себя!"
+                })
+        if current_user.subscriptions.filter(id=author.id):
+            raise serializers.ValidationError({
+                "errors": "Вы уже подписаны!"
+                })
+        current_user.subscriptions.add(author)
+        return data
+
     def get_recipes_count(self, obj):
         return obj.recipes.all().count()
 
     def get_recipes(self, obj):
         recipes = obj.recipes.all()
-        serializer_class = getattr(
-            importlib.import_module('recipes.serializers'),
-            'SimpleRecipeSerializer',
-        )
+        serializer_class = rcp.SimpleRecipeSerializer
         serializer = serializer_class(
             many=True,
             instance=recipes

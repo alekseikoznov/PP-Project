@@ -1,8 +1,10 @@
 import base64
+
 from django.core.files.base import ContentFile
 from rest_framework import serializers
-from .models import TagRecipe, Tag, Ingredient, IngredientRecipe, Recipe
 from users.serializers import CustomUserSerializer
+
+from .models import Ingredient, IngredientRecipe, Recipe, Tag, TagRecipe
 
 
 class Base64ImageField(serializers.ImageField):
@@ -103,15 +105,20 @@ class PostRecipeSerializer(serializers.ModelSerializer):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
         recipe = Recipe.objects.create(**validated_data)
+        ingredients_list = []
+        tags_list = []
         for ingredient in ingredients:
             id = ingredient.get('id')
             amount = ingredient.get('amount')
             ingredient_unit = Ingredient.objects.get(id=id)
-            IngredientRecipe.objects.create(ingredient=ingredient_unit,
-                                            recipe=recipe,
-                                            amount=amount)
+            ingredients_list.append(
+                IngredientRecipe(ingredient=ingredient_unit,
+                                 recipe=recipe,
+                                 amount=amount))
+        IngredientRecipe.objects.bulk_create(ingredients_list)
         for tag in tags:
-            TagRecipe.objects.create(tag=tag, recipe=recipe)
+            tags_list.append(TagRecipe(tag=tag, recipe=recipe))
+        TagRecipe.objects.bulk_create(tags_list)
         return recipe
 
     def update(self, instance, validated_data):
@@ -145,3 +152,21 @@ class SimpleRecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
+
+    def validate(self, data):
+        method_class = self.context.get('class')
+        current_user = self.context.get('request').user
+        recipe = self.context.get('recipe')
+        if method_class == 'favorite':
+            if current_user.favorite.filter(id=recipe.id):
+                raise serializers.ValidationError({
+                    "errors": "Рецепт уже есть в избранном"
+                    })
+            current_user.favorite.add(recipe)
+        elif method_class == 'shopping_cart':
+            if current_user.shopping_cart.filter(id=recipe.id):
+                raise serializers.ValidationError({
+                    "errors": "Рецепт уже есть в списке покупок"
+                    })
+            current_user.shopping_cart.add(recipe)
+        return data

@@ -7,6 +7,11 @@ class Tag(models.Model):
     slug = models.SlugField(unique=True, max_length=200)
     color = models.CharField(unique=True, max_length=7)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['slug', ]),
+            ]
+
     def __str__(self):
         return self.name
 
@@ -14,6 +19,11 @@ class Tag(models.Model):
 class Ingredient(models.Model):
     name = models.CharField(max_length=200)
     measurement_unit = models.CharField(max_length=200)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['name', ]),
+            ]
 
     def __str__(self):
         return self.name
@@ -31,6 +41,12 @@ class Recipe(models.Model):
     tags = models.ManyToManyField(Tag, through='TagRecipe')
     text = models.TextField()
     cooking_time = models.PositiveSmallIntegerField()
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['name', ]),
+            models.Index(fields=['author', ]),
+            ]
 
     def __str__(self):
         return self.name
