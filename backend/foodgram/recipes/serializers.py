@@ -157,6 +157,18 @@ class SimpleRecipeSerializer(serializers.ModelSerializer):
         method_class = self.context.get('class')
         current_user = self.context.get('request').user
         recipe = self.context.get('recipe')
+        if self.context.get('request').method == 'DELETE':
+            if method_class == 'favorite':
+                if not current_user.favorite.filter(id=recipe.id):
+                    raise serializers.ValidationError({
+                        "errors": "Данного рецепта нет в избранном"
+                        })
+            elif method_class == 'shopping_cart':
+                if not current_user.shopping_cart.filter(id=recipe.id):
+                    raise serializers.ValidationError({
+                        "errors": "Данного рецепта нет в списке покупок"
+                        })
+            return data
         if method_class == 'favorite':
             if current_user.favorite.filter(id=recipe.id):
                 raise serializers.ValidationError({

@@ -37,8 +37,16 @@ class SubscriptionsSerializer(CustomUserSerializer):
                   'is_subscribed', 'recipes_count', 'recipes')
 
     def validate(self, data):
+        print(self.instance)
+        print(data)
         current_user = self.context.get('request').user
         author = self.context.get('author')
+        if self.context.get('request').method == 'DELETE':
+            if not current_user.subscriptions.filter(id=author.id):
+                raise serializers.ValidationError({
+                    "errors": "Вы не были подписаны"
+                    })
+            return data
         if current_user == author:
             raise serializers.ValidationError({
                 "errors": "Нельзя подписаться на себя!"

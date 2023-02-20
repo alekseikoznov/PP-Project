@@ -36,15 +36,15 @@ class CreateDeleteSubViewSet(CreteDestroyModelViewSet):
     def destroy(self, request, *args, **kwargs):
         author_id = self.kwargs['user_id']
         author_to_subscribe = get_object_or_404(CustomUser, id=author_id)
+        dict_obj = model_to_dict(author_to_subscribe)
+        serializer = SubscriptionsSerializer(
+            author_to_subscribe,
+            data=dict_obj,
+            context={"request": self.request, 'author': author_to_subscribe})
+        serializer.is_valid(raise_exception=True)
         current_user = self.request.user
-        if current_user.subscriptions.filter(id=author_id):
-            current_user.subscriptions.remove(author_to_subscribe)
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        data = {
-                "errors": "Вы не были подписаны"
-                }
-        return Response(status=status.HTTP_400_BAD_REQUEST,
-                        data=data)
+        current_user.subscriptions.remove(author_to_subscribe)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class SubscriptionsViewSet(ListModelViewSet):

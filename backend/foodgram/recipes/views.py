@@ -79,15 +79,18 @@ class ShoppingCartViewSet(CreteDestroyModelViewSet):
     def destroy(self, request, *args, **kwargs):
         recipe_id = self.kwargs['recipe_id']
         recipe = get_object_or_404(Recipe, id=recipe_id)
+        dict_obj = model_to_dict(recipe)
+        serializer = SimpleRecipeSerializer(
+            recipe,
+            data=dict_obj,
+            context={'request': self.request,
+                     'recipe': recipe,
+                     'class': 'shopping_cart'})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         current_user = self.request.user
-        if current_user.shopping_cart.filter(id=recipe_id):
-            current_user.shopping_cart.remove(recipe)
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        data = {
-                "errors": "Данного рецепта нет в списке покупок"
-                }
-        return Response(status=status.HTTP_400_BAD_REQUEST,
-                        data=data)
+        current_user.shopping_cart.remove(recipe)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class FavoriteViewSet(CreteDestroyModelViewSet):
@@ -117,15 +120,17 @@ class FavoriteViewSet(CreteDestroyModelViewSet):
     def destroy(self, request, *args, **kwargs):
         recipe_id = self.kwargs['recipe_id']
         recipe = get_object_or_404(Recipe, id=recipe_id)
+        dict_obj = model_to_dict(recipe)
+        serializer = SimpleRecipeSerializer(
+            recipe,
+            data=dict_obj,
+            context={'request': self.request,
+                     'recipe': recipe,
+                     'class': 'favorite'})
+        serializer.is_valid(raise_exception=True)
         current_user = self.request.user
-        if current_user.favorite.filter(id=recipe_id):
-            current_user.favorite.remove(recipe)
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        data = {
-                "errors": "Данного рецепта нет в избранном"
-                }
-        return Response(status=status.HTTP_400_BAD_REQUEST,
-                        data=data)
+        current_user.favorite.remove(recipe)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class ShoppindCartPDFView(APIView):
