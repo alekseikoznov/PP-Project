@@ -37,8 +37,6 @@ class SubscriptionsSerializer(CustomUserSerializer):
                   'is_subscribed', 'recipes_count', 'recipes')
 
     def validate(self, data):
-        print(self.instance)
-        print(data)
         current_user = self.context.get('request').user
         author = self.context.get('author')
         if self.context.get('request').method == 'DELETE':
