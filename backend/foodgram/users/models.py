@@ -19,6 +19,9 @@ class CustomUser(AbstractUser):
                                            related_name="user_shopping_cart",
                                            blank=True)
 
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username', 'first_name', 'last_name', 'password']
+
     class Meta:
         indexes = [
             models.Index(fields=['email', ]),

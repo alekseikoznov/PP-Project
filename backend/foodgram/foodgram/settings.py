@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'rest_framework.authtoken',
     'rest_framework',
+    'corsheaders',
     'djoser',
     'django_filters',
 ]
@@ -27,6 +28,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -57,8 +59,12 @@ WSGI_APPLICATION = 'foodgram.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': os.getenv('DB_ENGINE'),
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('POSTGRES_USER'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT')
     }
 }
 
@@ -91,6 +97,7 @@ USE_TZ = True
 
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -121,3 +128,6 @@ DJOSER = {
 AUTH_USER_MODEL = 'users.CustomUser'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
+CORS_ORIGIN_ALLOW_ALL = True
+# CORS_URLS_REGEX = r'^/api/.*$'
