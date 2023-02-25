@@ -100,6 +100,20 @@ class PostRecipeSerializer(serializers.ModelSerializer):
         fields = ('ingredients', 'tags', 'image', 'name', 'text',
                   'cooking_time')
 
+    def validate_ingredients(self, value):
+        for ingredient in value:
+            try:
+                amount = int(ingredient.get('amount'))
+            except ValueError:
+                raise serializers.ValidationError({
+                        "errors": "Введите числовое значение в количество"
+                        })
+            if not amount in range(0, 32768):
+                raise serializers.ValidationError({
+                        "errors": "Введите значение от 0 до 32767"
+                        })
+        return value
+
     def create(self, validated_data):
         validated_data['author'] = self.context.get('request').user
         ingredients = validated_data.pop('ingredients')

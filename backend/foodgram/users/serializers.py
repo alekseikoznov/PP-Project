@@ -60,7 +60,8 @@ class SubscriptionsSerializer(CustomUserSerializer):
         return obj.recipes.all().count()
 
     def get_recipes(self, obj):
-        recipes = obj.recipes.all()
+        recipes_limit = int(self.context.get('request').GET.get('recipes_limit'))
+        recipes = obj.recipes.all()[:recipes_limit]
         serializer_class = rcp.SimpleRecipeSerializer
         serializer = serializer_class(
             many=True,

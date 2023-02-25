@@ -1,6 +1,11 @@
 import django_filters
+from rest_framework.filters import SearchFilter
 
 from .models import Recipe
+
+
+class IngredientSearchFilter(SearchFilter):
+    search_param = 'name'
 
 
 class RecipeFilter(django_filters.FilterSet):
@@ -21,7 +26,7 @@ class RecipeFilter(django_filters.FilterSet):
     )
 
     def get_tags(self, queryset, field_name, value):
-        return queryset.filter(tags__slug__in=self.request.GET.getlist('tags'))
+        return queryset.filter(tags__slug__in=self.request.GET.getlist('tags')).distinct()
 
     def get_user_field(self, queryset, field_name, value):
         user = self.request.user
