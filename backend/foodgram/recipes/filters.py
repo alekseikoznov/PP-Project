@@ -26,7 +26,8 @@ class RecipeFilter(django_filters.FilterSet):
     )
 
     def get_tags(self, queryset, field_name, value):
-        return queryset.filter(tags__slug__in=self.request.GET.getlist('tags')).distinct()
+        return queryset.filter(
+            tags__slug__in=self.request.GET.getlist('tags')).distinct()
 
     def get_user_field(self, queryset, field_name, value):
         user = self.request.user

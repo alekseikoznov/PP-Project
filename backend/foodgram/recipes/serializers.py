@@ -108,7 +108,7 @@ class PostRecipeSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError({
                         "errors": "Введите числовое значение в количество"
                         })
-            if not amount in range(0, 32768):
+            if amount not in range(0, 32768):
                 raise serializers.ValidationError({
                         "errors": "Введите значение от 0 до 32767"
                         })
