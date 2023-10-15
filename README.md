@@ -63,17 +63,17 @@ docker-compose up -d
 
 4. Выполнить миграции:
 ```
-docker-compose exec web python manage.py migrate
+docker-compose exec backend python manage.py migrate
 ```
 
 5. Создать суперюзера:
 ```
-docker-compose exec web python manage.py createsuperuser
+docker-compose exec backend python manage.py createsuperuser
 ```
 
 6. Собрать статику:
 ```
-docker-compose exec web python manage.py collectstatic --no-input
+docker-compose exec backend python manage.py collectstatic --no-input
 ```
 
 7. После успешного запуска проект станет доступен по адресу:  
